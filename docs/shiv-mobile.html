@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Shiv Mobile — Android & iOS Executor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#07070b;
+  --panel:#121218;
+  --panel2:#181822;
+  --line:#2a2a36;
+  --text:#ececf1;
+  --muted:#9a9aaa;
+  --blue:#3b6cff;
+  --blue-soft:#8aa4ff;
+  --green:#3dd68c;
+  --yellow:#f5c542;
+  --red:#ff5c6c;
+  --track:#2c2c38;
+  --accent:#4f8cff;
+  --cyan:#4fd1c5;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Outfit,system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  background-image:
+    radial-gradient(900px 420px at 85% -8%,rgba(79,209,197,.16),transparent 55%),
+    radial-gradient(700px 400px at 8% 100%,rgba(59,108,255,.14),transparent 50%),
+    linear-gradient(#07070b,#0b0b12);
+  min-height:100vh;
+}
+a{color:inherit;text-decoration:none}
+header,main,footer{max-width:1180px;margin:0 auto;padding:24px}
+header{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:50;
+  background:rgba(7,7,11,.82);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding-top:16px;padding-bottom:16px;
+}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,#3b6cff,#4fd1c5);
+  display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:.02em;
+  box-shadow:0 0 24px rgba(79,209,197,.28);
+}
+.sub{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+nav a{
+  margin-left:2px;color:#c8c8d2;font-size:13px;
+  padding:6px 12px;border-radius:999px;border:1px solid transparent;
+  transition:border-color .15s,background .15s,color .15s;
+}
+nav a:hover,nav a.active{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff}
+.pill{
+  border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;
+  font-size:12px;color:var(--muted);
+}
+.pill.live{border-color:rgba(61,214,140,.4);color:var(--green);background:rgba(61,214,140,.08)}
+
+h1{font-size:clamp(36px,6vw,68px);line-height:.95;margin:12px 0;letter-spacing:-.03em}
+.blue{color:var(--blue-soft)}
+.cyan{color:var(--cyan)}
+.kicker{font-family:"IBM Plex Mono",monospace;letter-spacing:.2em;text-transform:uppercase;font-size:12px;color:var(--cyan)}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;margin-top:20px}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+
+.card,.box{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+}
+.card{padding:18px}
+.btn{
+  background:var(--blue);color:#fff;border:0;border-radius:999px;
+  padding:10px 18px;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  transition:filter .15s,transform .1s;justify-content:center;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,.15);color:#d6d6e0}
+.ghost:hover{background:rgba(255,255,255,.04)}
+.btn-cyan{background:linear-gradient(135deg,#2a8f88,#3b6cff)}
+
+section{margin-top:56px}
+h2{margin:0 0 16px;font-size:24px;letter-spacing:-.02em}
+h3{margin:0 0 8px;font-size:16px}
+.muted{color:var(--muted);font-size:14px;line-height:1.55}
+.lead{font-size:17px;color:#c8c8d4;line-height:1.55;max-width:52ch}
+
+/* phone mock */
+.phone-wrap{display:flex;justify-content:center;perspective:900px}
+.phone{
+  width:min(320px,100%);
+  background:linear-gradient(180deg,#101018,#16161e);
+  border:1px solid var(--line);border-radius:28px;overflow:hidden;
+  box-shadow:0 28px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04),inset 0 0 0 1px rgba(255,255,255,.03);
+  transform:rotateY(-6deg) rotateX(2deg);
+  transition:transform .35s ease;
+}
+.phone:hover{transform:rotateY(0) rotateX(0)}
+.phone-notch{
+  height:22px;display:flex;align-items:center;justify-content:center;
+  background:#0c0c12;border-bottom:1px solid var(--line);
+}
+.phone-notch span{
+  width:72px;height:6px;border-radius:999px;background:#1c1c26;
+}
+.phone-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);
+  background:#0e0e14;
+}
+.phone-bar .title{color:#e0e0ea;font-weight:600;letter-spacing:.02em}
+.phone-body{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:340px}
+.phone-status{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--cyan);
+  padding:6px 10px;background:#0a0a10;border-radius:8px;border:1px solid var(--line);
+}
+.phone-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.phone-actions button{
+  background:#1a1a24;border:1px solid var(--line);color:#d0d0da;
+  border-radius:10px;padding:9px 8px;font:inherit;font-size:12px;cursor:pointer;
+  transition:background .12s,border-color .12s,color .12s;
+}
+.phone-actions button:hover,.phone-actions button.active{
+  background:rgba(59,108,255,.18);border-color:rgba(59,108,255,.4);color:#fff;
+}
+.phone-editor{
+  flex:1;background:#0a0a10;border:1px solid var(--line);border-radius:12px;
+  padding:10px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:#b8c4e0;
+  min-height:120px;white-space:pre-wrap;line-height:1.45;overflow:auto;
+}
+.phone-log{
+  height:72px;overflow:auto;background:#08080c;border:1px solid var(--line);
+  border-radius:10px;padding:8px;font-family:"IBM Plex Mono",monospace;font-size:10px;
+  color:#8a9099;line-height:1.4;
+}
+.phone-log .ok{color:var(--green)}
+.phone-log .err{color:var(--red)}
+.phone-log .info{color:var(--blue-soft)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;padding:5px 10px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);
+}
+.chip.ok{border-color:rgba(61,214,140,.35);color:var(--green);background:rgba(61,214,140,.07)}
+.chip.warn{border-color:rgba(245,197,66,.35);color:var(--yellow);background:rgba(245,197,66,.07)}
+.status-row{display:flex;flex-wrap:wrap;gap:8px}
+
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:800px){.flow{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.flow{grid-template-columns:1fr}}
+.step{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.step .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--cyan);letter-spacing:.08em}
+.step strong{font-size:14px}
+.step span{font-size:13px;color:var(--muted);line-height:1.45}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:900px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
+.feat{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;
+  transition:border-color .15s,transform .15s;
+}
+.feat:hover{border-color:rgba(79,209,197,.35);transform:translateY(-1px)}
+.feat .icon{
+  width:36px;height:36px;border-radius:10px;background:rgba(79,209,197,.12);
+  color:var(--cyan);display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;
+  font-size:11px;font-weight:600;margin-bottom:10px;
+}
+.feat p{margin:0;font-size:13.5px;color:#b0b0be;line-height:1.5}
+
+.plat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.plat-grid{grid-template-columns:1fr}}
+.plat{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;
+}
+.plat h3{display:flex;align-items:center;gap:10px}
+.plat .tag{
+  font-size:11px;font-family:"IBM Plex Mono",monospace;padding:3px 8px;border-radius:999px;
+  border:1px solid rgba(79,209,197,.3);color:var(--cyan);
+}
+.plat ul{margin:12px 0 0;padding:0 0 0 18px;color:#c0c0cc;font-size:13.5px;line-height:1.65}
+
+/* pricing */
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:800px){.price-grid{grid-template-columns:1fr}}
+.price{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;
+  display:flex;flex-direction:column;gap:12px;position:relative;
+  transition:transform .15s,border-color .15s;
+}
+.price:hover{transform:translateY(-2px)}
+.price.featured{
+  border-color:rgba(59,108,255,.55);
+  box-shadow:0 0 0 1px rgba(59,108,255,.2),0 16px 40px rgba(59,108,255,.12);
+}
+.price .badge{
+  position:absolute;top:-10px;right:16px;
+  background:var(--blue);color:#fff;font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:999px;
+}
+.price .name{font-size:14px;color:var(--muted);font-family:"IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+.price .amount{font-size:36px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.price .amount span{font-size:15px;font-weight:500;color:var(--muted)}
+.price ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;flex:1}
+.price li{font-size:13.5px;color:#c8c8d4;display:flex;gap:8px;align-items:flex-start}
+.price li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+.price .btn{width:100%;margin-top:4px}
+
+/* unlock / download gate */
+.gate{
+  margin-top:20px;padding:18px;border-radius:16px;
+  background:var(--panel2);border:1px solid var(--line);display:none;
+}
+.gate.open{display:block}
+.gate h3{margin:0 0 8px}
+.gate .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.gate input{
+  flex:1;min-width:180px;background:#0a0a10;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;color:var(--text);font:inherit;font-size:14px;
+}
+.gate input:focus{outline:none;border-color:rgba(59,108,255,.5)}
+.dl-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.dl-links a,.dl-links button{
+  font-size:13px;padding:10px 16px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+  color:#e0e0ea;cursor:pointer;font:inherit;
+}
+.dl-links a:hover,.dl-links button:hover{border-color:rgba(79,209,197,.4);color:#fff}
+.dl-links .primary{background:var(--blue);border-color:transparent;color:#fff}
+.dl-links .primary:hover{filter:brightness(1.08)}
+
+/* FAQ */
+.faq details{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  margin-bottom:8px;overflow:hidden;
+}
+.faq summary{
+  padding:14px 16px;cursor:pointer;font-weight:500;font-size:14.5px;
+  list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:16px}
+.faq details[open] summary::after{content:"−"}
+.faq .ans{padding:0 16px 14px;color:#b8b8c4;font-size:13.5px;line-height:1.55}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+
+footer{
+  margin-top:64px;padding:28px 24px 48px;border-top:1px solid rgba(255,255,255,.06);
+  color:var(--muted);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+
+/* modal checkout */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:100;padding:16px;
+}
+.modal-bg.open{display:flex}
+.modal{
+  width:min(420px,100%);background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+.modal h3{margin:0 0 6px}
+.modal .plan-line{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--cyan);margin-bottom:14px}
+.modal label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.modal input,.modal select{
+  width:100%;background:#0a0a10;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;color:var(--text);font:inherit;font-size:14px;
+}
+.modal .actions{display:flex;gap:8px;margin-top:16px}
+.modal .actions .btn{flex:1}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#16161e;border:1px solid var(--line);color:var(--text);
+  padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:110;
+  transition:transform .25s ease,opacity .25s;opacity:0;pointer-events:none;
+  box-shadow:0 12px 32px rgba(0,0,0,.4);
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">SM</div>
+    <div>
+      <div style="font-weight:600;font-size:15px">Shiv Mobile</div>
+      <div class="sub">Android · iOS · external inject</div>
+    </div>
+  </div>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#platforms">Platforms</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#download">Download</a>
+    <a href="#faq">FAQ</a>
+    <span class="pill live">● Live</span>
+  </nav>
+</header>
+
+<main>
+  <div class="kicker">External inject · 100% UNC + sUNC</div>
+  <div class="hero">
+    <div>
+      <h1>Shiv<br><span class="cyan">Mobile</span></h1>
+      <p class="lead">
+        Roblox executor for phone players. External inject — stock client stays stock.
+        Full UNC / sUNC. Android APK + iOS IPA. Same brain as desktop FW.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-cyan" href="#pricing">Get access</a>
+        <a class="btn ghost" href="#download">Download</a>
+      </div>
+      <div class="status-row" style="margin-top:18px">
+        <span class="chip ok">Android 8+</span>
+        <span class="chip ok">iOS 15+</span>
+        <span class="chip ok">100% UNC</span>
+        <span class="chip warn">External inject</span>
+      </div>
+    </div>
+
+    <!-- Interactive phone mock -->
+    <div class="phone-wrap">
+      <div class="phone" id="phone">
+        <div class="phone-notch"><span></span></div>
+        <div class="phone-bar">
+          <span class="title">Shiv Mobile</span>
+          <span id="phoneStatus">Idle</span>
+        </div>
+        <div class="phone-body">
+          <div class="phone-status" id="phoneLine">status: waiting · join a game</div>
+          <div class="phone-actions">
+            <button type="button" id="btnAttach">Attach</button>
+            <button type="button" id="btnInject">Inject</button>
+            <button type="button" id="btnExecute">Execute</button>
+            <button type="button" id="btnClear">Clear</button>
+          </div>
+          <div class="phone-editor" id="phoneEditor" contenteditable="true" spellcheck="false">-- Shiv Mobile
+print(identifyexecutor())
+print("identity", getthreadidentity and getthreadidentity())
+</div>
+          <div class="phone-log" id="phoneLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <p class="muted" style="margin:-6px 0 16px;max-width:60ch">External inject. Not a modded Roblox APK. Four steps on phone.</p>
+    <div class="flow">
+      <div class="step">
+        <div class="n">01</div>
+        <strong>Install host</strong>
+        <span>APK (Android) or sideload IPA (iOS). Unknown sources / AltStore · Sideloadly · TrollStore.</span>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <strong>Open Roblox</strong>
+        <span>Stock client. Join any game. Leave it in the foreground.</span>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <strong>Attach → Inject</strong>
+        <span>Host finds process, loads runtime (.so / dylib), arms ScriptContext.</span>
+      </div>
+      <div class="step">
+        <div class="n">04</div>
+        <strong>Execute</strong>
+        <span>Paste or hub → Execute. Full UNC bootstrap prepended every run.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>Features</h2>
+    <p class="muted" style="margin:-6px 0 16px;max-width:60ch">Delta-class UX. External architecture. Desktop-grade UNC surface.</p>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="icon">EXT</div>
+        <h3>External inject</h3>
+        <p>Host app outside Roblox. Stock package signature intact. Update surface is injector + offsets — not a full client rebuild every patch.</p>
+      </div>
+      <div class="feat">
+        <div class="icon">UNC</div>
+        <h3>100% UNC + sUNC</h3>
+        <p>Environment, identity 8, closures, metatable, FS, HTTP, Drawing, instances, scripts, signals, websocket, actors, misc. identifyexecutor → "Shiv Mobile".</p>
+      </div>
+      <div class="feat">
+        <div class="icon">AND</div>
+        <h3>Android path</h3>
+        <p>ptrace / memfd load of libshiv_runtime.so into com.roblox.client (+ VNG). Abstract unix bridge. arm64 preferred, Android 8.0+.</p>
+      </div>
+      <div class="feat">
+        <div class="icon">iOS</div>
+        <h3>iOS path</h3>
+        <p>DYLD interpose + runtime dylib. Sideload via AltStore / Sideloadly / TrollStore. Full inject strength on TrollStore or JB.</p>
+      </div>
+      <div class="feat">
+        <div class="icon">UI</div>
+        <h3>Touch UI</h3>
+        <p>Attach · Inject · Execute · editor · console. Floating-friendly layout. Dark charcoal with cyan accent — matches Shiv language.</p>
+      </div>
+      <div class="feat">
+        <div class="icon">KEY</div>
+        <h3>License keys</h3>
+        <p>Same key family as FW (Day / Week / Month). HWID lock. Pay → key → unlock downloads. No free-tier abuse loop.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="platforms">
+    <h2>Platforms</h2>
+    <div class="plat-grid">
+      <div class="plat">
+        <h3>Android <span class="tag">APK</span></h3>
+        <p class="muted" style="margin:0">Min Android 8.0 (API 26). arm64-v8a recommended. No root required for UI; full inject prefers root or debuggable for reliability on stock.</p>
+        <ul>
+          <li>Package scan: com.roblox.client + regional variants</li>
+          <li>Remote maps / libc base resolve</li>
+          <li>Runtime .so + ScriptContext arm</li>
+          <li>Bridge: abstract socket <code style="color:var(--cyan)">shiv_mobile_bridge</code></li>
+        </ul>
+      </div>
+      <div class="plat">
+        <h3>iOS <span class="tag">IPA</span></h3>
+        <p class="muted" style="margin:0">iOS 15+. Sideload only. TrollStore or jailbreak unlocks full process attach; plain AltStore keeps UI + license live.</p>
+        <ul>
+          <li>SwiftUI host + InjectCore</li>
+          <li>DYLD interpose / task_for_pid path</li>
+          <li>Same UNC bootstrap as Android</li>
+          <li>App-group bridge for host ↔ runtime</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2>Pricing</h2>
+    <p class="muted" style="margin:-6px 0 16px;max-width:60ch">Same tiers as desktop FW. Pay → email proof → one-time receipt → key.</p>
+    <div class="price-grid">
+      <div class="price">
+        <div class="name">Day</div>
+        <div class="amount">$3 <span>/ 24h</span></div>
+        <ul>
+          <li>Android + iOS builds</li>
+          <li>Full UNC + sUNC</li>
+          <li>External inject</li>
+          <li>Editor + execute</li>
+          <li>HWID lock · 1 device</li>
+        </ul>
+        <a class="btn ghost" href="#" data-tier="day">Get Day — $3</a>
+      </div>
+      <div class="price featured">
+        <div class="badge">Popular</div>
+        <div class="name">Week</div>
+        <div class="amount">$12 <span>/ 7d</span></div>
+        <ul>
+          <li>Everything in Day</li>
+          <li>Priority offset refresh</li>
+          <li>Both platforms in one key</li>
+          <li>Email delivery</li>
+          <li>Faster update track</li>
+        </ul>
+        <a class="btn" href="#" data-tier="week">Get Week — $12</a>
+      </div>
+      <div class="price">
+        <div class="name">Month</div>
+        <div class="amount">$30 <span>/ 30d</span></div>
+        <ul>
+          <li>Everything in Week</li>
+          <li>Best value</li>
+          <li>Early mobile builds</li>
+          <li>Key reset 1× / month</li>
+          <li>Direct support priority</li>
+        </ul>
+        <a class="btn ghost" href="#" data-tier="month">Get Month — $30</a>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:14px;font-size:13px">
+      <b>Flow:</b> click a plan → payment URL opens → finish pay → email <b>proof + the Gmail you registered</b> to staff →
+      staff creates a <b>one-time receipt</b> → you redeem it on the
+      <a href="shiv-mobile-keys.html" style="color:var(--cyan)">keys page</a> → license key unlocks downloads.
+      Desktop FW uses Discord for the same step; mobile uses email only.
+    </p>
+  </section>
+
+  <section id="download">
+    <h2>Download</h2>
+    <p class="muted" style="margin:-6px 0 16px;max-width:60ch">
+      License key required. Get it by redeeming your one-time receipt on the
+      <a href="shiv-mobile-keys.html" style="color:var(--cyan)">keys page</a>, then paste here.
+    </p>
+    <div class="card">
+      <div class="row" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <input id="keyInput" type="text" placeholder="SHIV-WEEK-••••" style="flex:1;min-width:200px;background:#0a0a10;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--text);font:inherit;font-size:14px;font-family:'IBM Plex Mono',monospace"/>
+        <button class="btn" type="button" id="btnUnlock">Unlock downloads</button>
+      </div>
+      <p class="muted" style="margin:10px 0 0;font-size:13px" id="unlockHint">No key yet? Pay → email proof → redeem receipt on keys page.</p>
+      <div class="gate" id="dlGate">
+        <h3>Builds unlocked</h3>
+        <p class="muted" style="margin:0" id="dlPlanLine">Plan active.</p>
+        <div class="dl-links">
+          <a class="primary" id="dlAndroid" href="#" download>Download Android APK</a>
+          <a id="dlIos" href="#" download>Download iOS IPA</a>
+          <button type="button" id="btnCopyKey">Copy key</button>
+        </div>
+        <p class="muted" style="margin:12px 0 0;font-size:12px">
+          Android: enable Install unknown apps for your browser. iOS: sideload with AltStore, Sideloadly, or TrollStore.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2>FAQ</h2>
+    <div class="faq" id="faqList">
+      <details>
+        <summary>What is Shiv Mobile?</summary>
+        <div class="ans">External-inject Roblox executor for Android and iOS. Host app attaches to the stock Roblox process, loads a runtime, arms ScriptContext, and runs Luau with a full UNC + sUNC surface. identifyexecutor returns "Shiv Mobile".</div>
+      </details>
+      <details>
+        <summary>Is this a modded Roblox APK like Delta?</summary>
+        <div class="ans">No. Delta-class tools often ship a modified Roblox client. Shiv Mobile is external: you keep the official client, install a separate host, then Attach → Inject. Lower update pain; stock signature stays intact.</div>
+      </details>
+      <details>
+        <summary>Do I need root or jailbreak?</summary>
+        <div class="ans">Android: UI works without root. Reliable inject is stronger with root or a debuggable target. iOS: UI + license work on plain sideload; full process inject needs TrollStore entitlements or a jailbreak / rootless path.</div>
+      </details>
+      <details>
+        <summary>What is UNC / sUNC coverage?</summary>
+        <div class="ans">Full catalog: environment, identity (level 8), closures, metatable, filesystem, HTTP, encoding, crypt, Drawing, instances, scripts, cache, input, debug, signals, websocket, actors, misc. Bootstrap is prepended on every Execute so hubs resolve names even before native bindings replace stubs.</div>
+      </details>
+      <details>
+        <summary>How does pay → key → download work?</summary>
+        <div class="ans">Click Day / Week / Month — you are sent to the payment URL. After you pay, email proof of payment and the Gmail you want the key on to staff. Staff creates a one-time receipt and sends it to that Gmail. Redeem the receipt on the keys page (once only). You get a SHIV-… license key. Paste that key under Download to unlock APK / IPA. Desktop FW uses Discord tickets instead of email; mobile is email-only.</div>
+      </details>
+      <details>
+        <summary>Is the receipt one-time?</summary>
+        <div class="ans">Yes. Each receipt works once. Reusing it shows “already used.” The license key issued from it is what unlocks downloads and the app.</div>
+      </details>
+      <details>
+        <summary>Can one key cover Android and iOS?</summary>
+        <div class="ans">Yes. A single active key unlocks both platform builds. HWID locks on first redeem in the app. Month includes one HWID reset via staff.</div>
+      </details>
+      <details>
+        <summary>Will I get banned?</summary>
+        <div class="ans">Any third-party executor carries risk. Hyperion exists on mobile too. External inject reduces some package-level signals vs modded clients, but runtime behavior still matters. Use alts. No executor is permanently safe.</div>
+      </details>
+      <details>
+        <summary>Refunds?</summary>
+        <div class="ans">No refunds after key activation. If a key never activated, contact support within 24h of purchase for case-by-case review. Day plan is the low-risk trial.</div>
+      </details>
+      <details>
+        <summary>Where is support?</summary>
+        <div class="ans">Discord support for Week / Month. Priority queue for Month. Include key prefix (not full key), platform, Roblox version, and whether Attach, Inject, or Execute failed.</div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>Shiv Mobile · external inject · Android + iOS</div>
+  <div>Pay → email proof → one-time receipt → key · <a href="shiv-mobile-keys.html" style="color:var(--cyan)">keys page</a></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+
+  /* ---- interactive phone mock ---- */
+  const logEl = $('#phoneLog');
+  const statusEl = $('#phoneStatus');
+  const lineEl = $('#phoneLine');
+  let attached = false;
+  let injected = false;
+
+  function log(msg, cls) {
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setStatus(s, line) {
+    statusEl.textContent = s;
+    if (line) lineEl.textContent = line;
+  }
+
+  $('#btnAttach').addEventListener('click', () => {
+    setStatus('Scanning…', 'status: scanning for roblox…');
+    log('> attach', 'info');
+    setTimeout(() => {
+      attached = true;
+      injected = false;
+      setStatus('Attached', 'status: pid=4821 · com.roblox.client');
+      log('found pid=4821 canReadMem=true', 'ok');
+    }, 450);
+  });
+
+  $('#btnInject').addEventListener('click', () => {
+    if (!attached) {
+      log('attach first', 'err');
+      setStatus('Idle', 'status: attach required');
+      return;
+    }
+    setStatus('Injecting…', 'status: loading libshiv_runtime.so…');
+    log('> inject', 'info');
+    setTimeout(() => {
+      injected = true;
+      setStatus('Injected', 'status: armed · bridge up · identity 8');
+      log('shiv_arm ok · UNC bootstrap queued', 'ok');
+    }, 600);
+  });
+
+  $('#btnExecute').addEventListener('click', () => {
+    if (!injected) {
+      log('inject first', 'err');
+      return;
+    }
+    const src = ($('#phoneEditor').innerText || '').trim();
+    log('> execute (' + src.length + ' chars)', 'info');
+    setStatus('Running', 'status: execute + UNC prepend');
+    setTimeout(() => {
+      log('Shiv Mobile  0.1', 'ok');
+      log('identity  8', 'ok');
+      setStatus('Ready', 'status: armed · last execute ok');
+    }, 350);
+  });
+
+  $('#btnClear').addEventListener('click', () => {
+    logEl.innerHTML = '';
+    $('#phoneEditor').innerText = '-- Shiv Mobile\nprint(identifyexecutor())\n';
+  });
+
+  /* ---- pricing → payment URL (same pattern as fw.html / desktop) ---- */
+  // Set real Stripe Payment Links / PayPal / crypto checkout URLs.
+  // Empty = alert. Never auto-issues a free key.
+  const PAY_LINKS = {
+    day:   '', // e.g. 'https://buy.stripe.com/xxx-day'
+    week:  '', // e.g. 'https://buy.stripe.com/xxx-week'
+    month: '', // e.g. 'https://buy.stripe.com/xxx-month'
+  };
+
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  $$('[data-tier]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const tier = a.getAttribute('data-tier');
+      const link = PAY_LINKS[tier];
+      if (link) {
+        location.href = link;
+      } else {
+        alert(
+          'Payment link not set yet for ' + tier + '.\n\n' +
+          'After you pay, email proof + your Gmail to staff.\n' +
+          'Staff creates a one-time receipt → you redeem it on the keys page.\n' +
+          '(Desktop FW uses Discord for this step; mobile uses email.)'
+        );
+      }
+    });
+  });
+
+  /* ---- key unlock → download (keys come from one-time receipt redeem) ---- */
+  const VALID_RE = /^SHIV-(DAY|WEEK|MONTH)-[A-Z0-9\-]+$/i;
+
+  function unlockWithKey(key) {
+    const k = (key || '').trim();
+    if (!VALID_RE.test(k)) {
+      $('#dlGate').classList.remove('open');
+      $('#unlockHint').textContent = 'Invalid key. Redeem a one-time receipt on the keys page first (SHIV-WEEK-…).';
+      $('#unlockHint').style.color = 'var(--red)';
+      return false;
+    }
+    // Must have been issued via keys page (localStorage record).
+    let issued = [];
+    try { issued = JSON.parse(localStorage.getItem('shiv_mobile_issued_keys_v1') || '[]'); } catch (_) {}
+    const found = issued.find(x => (x.key || '').toUpperCase() === k.toUpperCase());
+    if (!found) {
+      $('#dlGate').classList.remove('open');
+      $('#unlockHint').textContent = 'Key not recognized on this device. Redeem your receipt on the keys page in this browser first.';
+      $('#unlockHint').style.color = 'var(--red)';
+      return false;
+    }
+    const plan = (k.split('-')[1] || 'WEEK').toUpperCase();
+    $('#dlGate').classList.add('open');
+    $('#dlPlanLine').textContent = 'Plan: ' + plan + ' · key accepted · HWID locks on first open of the app';
+    $('#unlockHint').textContent = 'Unlocked. Download Android APK or iOS IPA below.';
+    $('#unlockHint').style.color = 'var(--green)';
+
+    // Placeholder packages until real CDN URLs are wired.
+    const apkNote = '-- Shiv Mobile Android\n-- Replace with real APK from release pipeline\nkey=' + k + '\n';
+    const ipaNote = '-- Shiv Mobile iOS\n-- Replace with real IPA from release pipeline\nkey=' + k + '\n';
+    const apkBlob = new Blob([apkNote], { type: 'application/octet-stream' });
+    const ipaBlob = new Blob([ipaNote], { type: 'application/octet-stream' });
+    $('#dlAndroid').href = URL.createObjectURL(apkBlob);
+    $('#dlAndroid').download = 'ShivMobile-android.apk';
+    $('#dlIos').href = URL.createObjectURL(ipaBlob);
+    $('#dlIos').download = 'ShivMobile-ios.ipa';
+    try { localStorage.setItem('shiv_mobile_key', k); } catch (_) {}
+    return true;
+  }
+
+  $('#btnUnlock').addEventListener('click', () => {
+    const key = $('#keyInput').value;
+    if (unlockWithKey(key)) toast('Downloads unlocked');
+    else toast('Key rejected');
+  });
+
+  $('#btnCopyKey').addEventListener('click', async () => {
+    const key = $('#keyInput').value.trim();
+    try {
+      await navigator.clipboard.writeText(key);
+      toast('Key copied');
+    } catch {
+      toast('Copy failed — select the field manually');
+    }
+  });
+
+  try {
+    const saved = localStorage.getItem('shiv_mobile_key');
+    if (saved) {
+      $('#keyInput').value = saved;
+      unlockWithKey(saved);
+    }
+  } catch (_) {}
+
+  /* nav active on scroll */
+  const ids = ['features', 'platforms', 'pricing', 'download', 'faq'];
+  const navLinks = $$('nav a[href^="#"]');
+  function onScroll() {
+    let cur = ids[0];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 120) cur = id;
+    }
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>
